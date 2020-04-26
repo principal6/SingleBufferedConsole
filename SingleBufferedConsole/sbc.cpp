@@ -1,37 +1,37 @@
-#include "SingleBufferedConsole.h"
+﻿#include "SingleBufferedConsole.h"
 #include <string>
 #include <thread>
 #include <atomic>
 
 int main()
 {
-	CSingleBufferedConsole Console{ 130, 30, "Console", ECommandLinePosition::Bottom };
-	Console.SetClearBackground(EBackgroundColor::Black);
-	Console.SetDefaultForeground(EForegroundColor::White);
+	SingleBufferedConsole console{ 130, 30, "Console", ECommandLinePosition::Bottom };
+	console.setClearBackground(EBackgroundColor::Black);
+	console.setDefaultForeground(EForegroundColor::White);
 
-	std::atomic<short> X{};
-	std::atomic<short> Y{};
-	std::thread ThreadInput
+	std::atomic<short> x{};
+	std::atomic<short> y{};
+	std::thread threadInput
 	{
 		[&]()
 		{
 			while (true)
 			{
-				if (Console.IsTerminated()) break;
+				if (console.isTerminated()) break;
 
-				if (Console.HitKey())
+				if (console.hitKey())
 				{
-					if (Console.IsHitKey(EArrowKeys::Right)) ++X;
-					if (Console.IsHitKey(EArrowKeys::Left)) --X;
-					if (Console.IsHitKey(EArrowKeys::Down)) ++Y;
-					if (Console.IsHitKey(EArrowKeys::Up)) --Y;
-					if (Console.IsHitKey(VK_RETURN))
+					if (console.isKeyHit(EArrowKeys::Right)) ++x;
+					if (console.isKeyHit(EArrowKeys::Left)) --x;
+					if (console.isKeyHit(EArrowKeys::Down)) ++y;
+					if (console.isKeyHit(EArrowKeys::Up)) --y;
+					if (console.isKeyHit(VK_RETURN))
 					{
-						if (Console.ReadCommand())
+						if (console.readCommand())
 						{
-							if (Console.IsLastCommand("/quit"))
+							if (console.isLastCommand("/quit"))
 							{
-								Console.Terminate();
+								console.terminate();
 							}
 						}
 					}
@@ -42,27 +42,27 @@ int main()
 
 	while (true)
 	{
-		if (Console.IsTerminated()) break;
+		if (console.isTerminated()) break;
 
-		Console.Clear();
+		console.clear();
 
-		Console.FillBox(5, 5, 7, 10, '~', EBackgroundColor::Cyan, EForegroundColor::White);
+		console.fillBox(5, 5, 7, 10, '~', EBackgroundColor::Cyan, EForegroundColor::White);
 
-		Console.PrintBox(0, 0, 70, 29, ' ', EBackgroundColor::DarkGray, EForegroundColor::Black);
+		console.printBox(0, 0, 70, 29, ' ', EBackgroundColor::DarkGray, EForegroundColor::Black);
 
-		Console.PrintBox(70, 0, 40, 29, ' ', EBackgroundColor::DarkGray, EForegroundColor::Black);
-		Console.PrintCommandLog(70, 0, 40, 29);
+		console.printBox(70, 0, 40, 29, ' ', EBackgroundColor::DarkGray, EForegroundColor::Black);
+		console.printCommandLog(70, 0, 40, 29);
 		
-		Console.PrintChar(X, Y, '@', EForegroundColor::LightYellow);
+		console.printChar(x, y, '@', EForegroundColor::LightYellow);
 
-		Console.PrintChar(112, 1, 'X');
-		Console.PrintChar(112, 2, 'Y');
-		Console.PrintHString(114, 1, std::to_string(X).c_str());
-		Console.PrintHString(114, 2, std::to_string(Y).c_str());
+		console.printChar(112, 1, 'X');
+		console.printChar(112, 2, 'Y');
+		console.printHorzString(114, 1, std::to_string(x).c_str());
+		console.printHorzString(114, 2, std::to_string(y).c_str());
 
-		Console.Render();
+		console.render();
 	}
 
-	ThreadInput.join();
+	threadInput.join();
 	return 0;
 }

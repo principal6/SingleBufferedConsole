@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <Windows.h>
 #include <iostream>
@@ -64,552 +64,552 @@ enum class EForegroundColor
 	LightYellow = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN,
 };
 
-class CSingleBufferedConsole
+class SingleBufferedConsole
 {
 public:
-	CSingleBufferedConsole(short Width, short Height, const char* Title, ECommandLinePosition eCommandLinePosition) :
-		m_Width{ Width }, m_Height{ Height }, m_eCommandLinePosition{ eCommandLinePosition } 
+	SingleBufferedConsole(short width, short height, const char* title, ECommandLinePosition eCommandLinePosition) :
+		_width{ width }, _height{ height }, _eCommandLinePosition{ eCommandLinePosition } 
 	{
-		StartUp(Title); 
+		startUp(title); 
 	}
-	~CSingleBufferedConsole() 
+	virtual ~SingleBufferedConsole() 
 	{
-		CleanUp(); 
+		cleanUp(); 
 	}
 
 public:
-	void Clear()
+	virtual void clear() noexcept
 	{
-		CHAR_INFO EmptyChar{};
-		EmptyChar.Attributes = (WORD)((WORD)m_eClearBackground | (WORD)m_eDefaultForeground);
-		for (int i = 0; i < m_BufferSize; ++i)
+		CHAR_INFO emptyChar{};
+		emptyChar.Attributes = (WORD)((WORD)_eClearBackground | (WORD)_eDefaultForeground);
+		for (int i = 0; i < _bufferSize; ++i)
 		{
-			m_Buffer[i] = EmptyChar;
+			_buffer[i] = emptyChar;
 		}
 	}
 
 public:
-	void PrintChar(short X, short Y, char Char, WORD Attribute)
+	virtual void printChar(short x, short y, char ch, WORD attribute) noexcept
 	{
-		int Index{ Y * m_Width + X };
-		m_Buffer[Index].Attributes = Attribute;
-		m_Buffer[Index].Char.AsciiChar = Char;
+		int index{ y * _width + x };
+		_buffer[index].Attributes = attribute;
+		_buffer[index].Char.AsciiChar = ch;
 	}
 
-	void PrintChar(short X, short Y, char Char, EBackgroundColor eBackground, EForegroundColor eForeground)
+	virtual void printChar(short x, short y, char ch, EBackgroundColor eBackground, EForegroundColor eForeground) noexcept
 	{
-		PrintChar(X, Y, Char, GetNewAttribute(eBackground, eForeground));
+		printChar(x, y, ch, getNewAttribute(eBackground, eForeground));
 	}
 
-	void PrintChar(short X, short Y, char Char, EBackgroundColor eBackground)
+	virtual void printChar(short x, short y, char ch, EBackgroundColor eBackground) noexcept
 	{
-		PrintChar(X, Y, Char, GetPatchedAttribute(X, Y, eBackground));
+		printChar(x, y, ch, getPatchedAttribute(x, y, eBackground));
 	}
 
-	void PrintChar(short X, short Y, char Char, EForegroundColor eForeground)
+	virtual void printChar(short x, short y, char ch, EForegroundColor eForeground) noexcept
 	{
-		PrintChar(X, Y, Char, GetPatchedAttribute(X, Y, eForeground));
+		printChar(x, y, ch, getPatchedAttribute(x, y, eForeground));
 	}
 
-	void PrintChar(short X, short Y, char Char)
+	virtual void printChar(short x, short y, char ch) noexcept
 	{
-		PrintChar(X, Y, Char, GetCurrentAttribute(X, Y));
+		printChar(x, y, ch, getCurrentAttribute(x, y));
 	}
 
 public:
-	void PrintHString(short X, short Y, const char* String, WORD Attribute, int StringLength = -1)
+	virtual void printHorzString(short x, short y, const char* str, WORD attribute, int strLength = -1) noexcept
 	{
-		if (StringLength == -1) StringLength = (int)strlen(String);
+		if (strLength == -1) strLength = (int)strlen(str);
 
-		int StartIndex{ Y * m_Width + X };
-		for (int i = 0; i < StringLength; ++i)
+		int offset{ y * _width + x };
+		for (int i = 0; i < strLength; ++i)
 		{
-			m_Buffer[StartIndex + i].Attributes = Attribute;
-			m_Buffer[StartIndex + i].Char.AsciiChar = String[i];
+			_buffer[offset + i].Attributes = attribute;
+			_buffer[offset + i].Char.AsciiChar = str[i];
 		}
 	}
 
-	void PrintHString(short X, short Y, const char* String, EBackgroundColor eBackground, EForegroundColor eForeground, int StringLength = -1)
+	virtual void printHorzString(short x, short y, const char* str, EBackgroundColor eBackground, EForegroundColor eForeground, int strLength = -1) noexcept
 	{
-		PrintHString(X, Y, String, GetNewAttribute(eBackground, eForeground), StringLength);
+		printHorzString(x, y, str, getNewAttribute(eBackground, eForeground), strLength);
 	}
 
-	void PrintHString(short X, short Y, const char* String, EBackgroundColor eBackground, int StringLength = -1)
+	virtual void printHorzString(short x, short y, const char* str, EBackgroundColor eBackground, int strLength = -1) noexcept
 	{
-		PrintHString(X, Y, String, GetPatchedAttribute(X, Y, eBackground), StringLength);
+		printHorzString(x, y, str, getPatchedAttribute(x, y, eBackground), strLength);
 	}
 
-	void PrintHString(short X, short Y, const char* String, EForegroundColor eForeground, int StringLength = -1)
+	virtual void printHorzString(short x, short y, const char* str, EForegroundColor eForeground, int strLength = -1) noexcept
 	{
-		PrintHString(X, Y, String, GetPatchedAttribute(X, Y, eForeground), StringLength);
+		printHorzString(x, y, str, getPatchedAttribute(x, y, eForeground), strLength);
 	}
 
-	void PrintHString(short X, short Y, const char* String, int StringLength = -1)
+	virtual void printHorzString(short x, short y, const char* str, int strLength = -1) noexcept
 	{
-		PrintHString(X, Y, String, GetCurrentAttribute(X, Y), StringLength);
+		printHorzString(x, y, str, getCurrentAttribute(x, y), strLength);
 	}
 
-	void PrintHString(short X, short Y, const std::string& String)
+	virtual void printHorzString(short x, short y, const std::string& str) noexcept
 	{
-		PrintHString(X, Y, String.c_str(), (int)String.size());
+		printHorzString(x, y, str.c_str(), (int)str.size());
 	}
 
-	void PrintHString(short X, short Y, short Short)
+	virtual void printHorzString(short x, short y, short shortValue) noexcept
 	{
-		std::string String{ std::to_string((int)Short) };
-		PrintHString(X, Y, String.c_str(), (int)String.size());
+		std::string str{ std::to_string((int)shortValue) };
+		printHorzString(x, y, str.c_str(), (int)str.size());
 	}
 
 public:
-	void PrintVString(short X, short Y, const char* String, WORD Attribute, int StringLength = -1)
+	virtual void printVertString(short x, short y, const char* str, WORD attribute, int strLength = -1) noexcept
 	{
-		if (StringLength == -1) StringLength = (int)strlen(String);
+		if (strLength == -1) strLength = (int)strlen(str);
 
-		int StartIndex{ Y * m_Width + X };
-		for (int i = 0; i < StringLength; ++i)
+		int offset{ y * _width + x };
+		for (int i = 0; i < strLength; ++i)
 		{
-			m_Buffer[StartIndex + (i * m_Width)].Attributes = Attribute;
-			m_Buffer[StartIndex + (i * m_Width)].Char.AsciiChar = String[i];
+			_buffer[offset + (i * _width)].Attributes = attribute;
+			_buffer[offset + (i * _width)].Char.AsciiChar = str[i];
 		}
 	}
 
-	void PrintVString(short X, short Y, const char* String, EBackgroundColor eBackground, EForegroundColor eForeground, int StringLength = -1)
+	virtual void printVertString(short x, short y, const char* str, EBackgroundColor eBackground, EForegroundColor eForeground, int strLength = -1) noexcept
 	{
-		PrintVString(X, Y, String, GetNewAttribute(eBackground, eForeground), StringLength);
+		printVertString(x, y, str, getNewAttribute(eBackground, eForeground), strLength);
 	}
 
-	void PrintVString(short X, short Y, const char* String, EBackgroundColor eBackground, int StringLength = -1)
+	virtual void printVertString(short x, short y, const char* str, EBackgroundColor eBackground, int strLength = -1) noexcept
 	{
-		PrintVString(X, Y, String, GetPatchedAttribute(X, Y, eBackground), StringLength);
+		printVertString(x, y, str, getPatchedAttribute(x, y, eBackground), strLength);
 	}
 
-	void PrintVString(short X, short Y, const char* String, EForegroundColor eForeground, int StringLength = -1)
+	virtual void printVertString(short x, short y, const char* str, EForegroundColor eForeground, int strLength = -1) noexcept
 	{
-		PrintVString(X, Y, String, GetPatchedAttribute(X, Y, eForeground), StringLength);
+		printVertString(x, y, str, getPatchedAttribute(x, y, eForeground), strLength);
 	}
 
-	void PrintVString(short X, short Y, const char* String, int StringLength = -1)
+	virtual void printVertString(short x, short y, const char* str, int strLength = -1) noexcept
 	{
-		PrintVString(X, Y, String, GetCurrentAttribute(X, Y), StringLength);
+		printVertString(x, y, str, getCurrentAttribute(x, y), strLength);
 	}
 
 public:
-	void FillHChar(short X, short Y, char Char, int Count, WORD Attribute)
+	virtual void fillHorzChar(short x, short y, char ch, int count, WORD attribute) noexcept
 	{
-		int StartIndex{ Y * m_Width + X };
-		for (int i = 0; i < Count; ++i)
+		int offset{ y * _width + x };
+		for (int i = 0; i < count; ++i)
 		{
-			m_Buffer[StartIndex + i].Attributes = Attribute;
-			m_Buffer[StartIndex + i].Char.AsciiChar = Char;
+			_buffer[offset + i].Attributes = attribute;
+			_buffer[offset + i].Char.AsciiChar = ch;
 		}
 	}
 
-	void FillHChar(short X, short Y, char Char, int Count, EBackgroundColor eBackground, EForegroundColor eForeground)
+	virtual void fillHorzChar(short x, short y, char ch, int count, EBackgroundColor eBackground, EForegroundColor eForeground) noexcept
 	{
-		FillHChar(X, Y, Char, Count, GetNewAttribute(eBackground, eForeground));
+		fillHorzChar(x, y, ch, count, getNewAttribute(eBackground, eForeground));
 	}
 
-	void FillHChar(short X, short Y, char Char, int Count, EBackgroundColor eBackground)
+	virtual void fillHorzChar(short x, short y, char ch, int count, EBackgroundColor eBackground) noexcept
 	{
-		FillHChar(X, Y, Char, Count, GetPatchedAttribute(X, Y, eBackground));
+		fillHorzChar(x, y, ch, count, getPatchedAttribute(x, y, eBackground));
 	}
 
-	void FillHChar(short X, short Y, char Char, int Count, EForegroundColor eForeground)
+	virtual void fillHorzChar(short x, short y, char ch, int count, EForegroundColor eForeground) noexcept
 	{
-		FillHChar(X, Y, Char, Count, GetPatchedAttribute(X, Y, eForeground));
+		fillHorzChar(x, y, ch, count, getPatchedAttribute(x, y, eForeground));
 	}
 
-	void FillHChar(short X, short Y, char Char, int Count)
+	virtual void fillHorzChar(short x, short y, char ch, int count) noexcept
 	{
-		FillHChar(X, Y, Char, Count, GetCurrentAttribute(X, Y));
+		fillHorzChar(x, y, ch, count, getCurrentAttribute(x, y));
 	}
 
 public:
-	void FillVChar(short X, short Y, char Char, int Count, WORD Attribute)
+	virtual void fillVertChar(short x, short y, char ch, int count, WORD attribute) noexcept
 	{
-		int StartIndex{ Y * m_Width + X };
-		for (int i = 0; i < Count; ++i)
+		int offset{ y * _width + x };
+		for (int i = 0; i < count; ++i)
 		{
-			m_Buffer[StartIndex + (i * m_Width)].Attributes = Attribute;
-			m_Buffer[StartIndex + (i * m_Width)].Char.AsciiChar = Char;
+			_buffer[offset + (i * _width)].Attributes = attribute;
+			_buffer[offset + (i * _width)].Char.AsciiChar = ch;
 		}
 	}
 
-	void FillVChar(short X, short Y, char Char, int Count, EBackgroundColor eBackground, EForegroundColor eForeground)
+	virtual void fillVertChar(short x, short y, char ch, int count, EBackgroundColor eBackground, EForegroundColor eForeground) noexcept
 	{
-		FillVChar(X, Y, Char, Count, GetNewAttribute(eBackground, eForeground));
+		fillVertChar(x, y, ch, count, getNewAttribute(eBackground, eForeground));
 	}
 
-	void FillVChar(short X, short Y, char Char, int Count, EBackgroundColor eBackground)
+	virtual void fillVertChar(short x, short y, char ch, int count, EBackgroundColor eBackground) noexcept
 	{
-		FillVChar(X, Y, Char, Count, GetPatchedAttribute(X, Y, eBackground));
+		fillVertChar(x, y, ch, count, getPatchedAttribute(x, y, eBackground));
 	}
 
-	void FillVChar(short X, short Y, char Char, int Count, EForegroundColor eForeground)
+	virtual void fillVertChar(short x, short y, char ch, int count, EForegroundColor eForeground) noexcept
 	{
-		FillVChar(X, Y, Char, Count, GetPatchedAttribute(X, Y, eForeground));
+		fillVertChar(x, y, ch, count, getPatchedAttribute(x, y, eForeground));
 	}
 
-	void FillVChar(short X, short Y, char Char, int Count)
+	virtual void fillVertChar(short x, short y, char ch, int count) noexcept
 	{
-		FillVChar(X, Y, Char, Count, GetCurrentAttribute(X, Y));
+		fillVertChar(x, y, ch, count, getCurrentAttribute(x, y));
 	}
 
 public:
-	void PrintBox(short X, short Y, short Width, short Height, char Char, EBackgroundColor eBackground, EForegroundColor eForeground)
+	virtual void printBox(short x, short y, short Width, short Height, char ch, EBackgroundColor eBackground, EForegroundColor eForeground) noexcept
 	{
-		FillHChar(X, Y, Char, Width, eBackground, eForeground);
-		FillHChar(X, Y + Height - 1, Char, Width, eBackground, eForeground);
-		FillVChar(X, Y, Char, Height, eBackground, eForeground);
-		FillVChar(X + Width - 1, Y, Char, Height, eBackground, eForeground);
+		fillHorzChar(x, y, ch, Width, eBackground, eForeground);
+		fillHorzChar(x, y + Height - 1, ch, Width, eBackground, eForeground);
+		fillVertChar(x, y, ch, Height, eBackground, eForeground);
+		fillVertChar(x + Width - 1, y, ch, Height, eBackground, eForeground);
 	}
 
-	void FillBox(short X, short Y, short Width, short Height, char Char, EBackgroundColor eBackground, EForegroundColor eForeground)
+	virtual void fillBox(short x, short y, short Width, short Height, char ch, EBackgroundColor eBackground, EForegroundColor eForeground) noexcept
 	{
 		for (short i = 0; i < Height; ++i)
 		{
-			FillHChar(X, Y + i, Char, Width, eBackground, eForeground);
+			fillHorzChar(x, y + i, ch, Width, eBackground, eForeground);
 		}
 	}
 
-private:
-	WORD GetCurrentAttribute(short X, short Y) const
+protected:
+	virtual WORD getCurrentAttribute(short x, short y) const noexcept
 	{
-		int Index{ Y * m_Width + X };
-		return m_Buffer[Index].Attributes;
+		int index{ y * _width + x };
+		return _buffer[index].Attributes;
 	}
 
-	WORD GetNewAttribute(EBackgroundColor eBackground, EForegroundColor eForeground) const
+	virtual WORD getNewAttribute(EBackgroundColor eBackground, EForegroundColor eForeground) const noexcept
 	{
 		return (WORD)((WORD)eBackground | (WORD)eForeground);
 	}
 
-	WORD GetPatchedAttribute(short X, short Y, EBackgroundColor eBackground) const
+	virtual WORD getPatchedAttribute(short X, short Y, EBackgroundColor eBackground) const noexcept
 	{
-		return (WORD)((GetCurrentAttribute(X, Y) & 0x000F) + (WORD)eBackground);
+		return (WORD)((getCurrentAttribute(X, Y) & 0x000F) + (WORD)eBackground);
 	}
 
-	WORD GetPatchedAttribute(short X, short Y, EForegroundColor eForeground) const
+	virtual WORD getPatchedAttribute(short X, short Y, EForegroundColor eForeground) const noexcept
 	{
-		return (WORD)((GetCurrentAttribute(X, Y) & 0x00F0) + (WORD)eForeground);
+		return (WORD)((getCurrentAttribute(X, Y) & 0x00F0) + (WORD)eForeground);
 	}
 
 public:
-	void Render() const
+	virtual void render() const noexcept
 	{
-		SMALL_RECT Rect{};
-		Rect.Top = (m_eCommandLinePosition == ECommandLinePosition::Bottom) ? 0 : 1;
-		Rect.Right = m_Width;
-		Rect.Bottom = m_Height + Rect.Top - 1;
+		SMALL_RECT rect{};
+		rect.Top = (_eCommandLinePosition == ECommandLinePosition::Bottom) ? 0 : 1;
+		rect.Right = _width;
+		rect.Bottom = _height + rect.Top - 1;
 		WriteConsoleOutputA(
-			m_Output,
-			m_Buffer,
-			COORD{ Rect.Right, Rect.Bottom - Rect.Top },
+			_output,
+			_buffer,
+			COORD{ rect.Right, rect.Bottom - rect.Top },
 			COORD{ 0, 0 },
-			&Rect);
+			&rect);
 
-		COORD Coord{ 0, (m_eCommandLinePosition == ECommandLinePosition::Bottom) ? m_Height - 1 : 0 };
-		DWORD Written{};
-		if (IsReadingCommand())
+		COORD coord{ 0, (_eCommandLinePosition == ECommandLinePosition::Bottom) ? _height - 1 : 0 };
+		DWORD writtenCount{};
+		if (isReadingCommand())
 		{
-			WriteConsoleOutputCharacterA(m_Output, "> ", 2, Coord, &Written);
+			WriteConsoleOutputCharacterA(_output, "> ", 2, coord, &writtenCount);
 
-			short CommandBufferSize{ (short)strlen(m_CommandBuffer) };
-			Coord.X += 2;
-			WriteConsoleOutputCharacterA(m_Output, m_CommandBuffer, CommandBufferSize, Coord, &Written);
+			short commandBufferSize{ (short)strlen(_commandBuffer) };
+			coord.X += 2;
+			WriteConsoleOutputCharacterA(_output, _commandBuffer, commandBufferSize, coord, &writtenCount);
 
 			wchar_t wsEnd[2]{ 0x25c4 };
-			Coord.X += CommandBufferSize;
-			WriteConsoleOutputCharacterW(m_Output, wsEnd, 1, Coord, &Written);
+			coord.X += commandBufferSize;
+			WriteConsoleOutputCharacterW(_output, wsEnd, 1, coord, &writtenCount);
 
-			Coord.X += 1;
-			FillConsoleOutputCharacterA(m_Output, ' ', m_Width - Coord.X, Coord, &Written);
+			coord.X += 1;
+			FillConsoleOutputCharacterA(_output, ' ', _width - coord.X, coord, &writtenCount);
 		}
 		else
 		{
-			FillConsoleOutputCharacterA(m_Output, ' ', m_Width, Coord, &Written);
+			FillConsoleOutputCharacterA(_output, ' ', _width, coord, &writtenCount);
 		}
 	}
 
 public:
-	void SetClearBackground(EBackgroundColor eBackground)
+	virtual void setClearBackground(EBackgroundColor eBackground) noexcept
 	{
-		m_eClearBackground = eBackground;
+		_eClearBackground = eBackground;
 	}
 
-	void SetDefaultForeground(EForegroundColor eForeground)
+	virtual void setDefaultForeground(EForegroundColor eForeground) noexcept
 	{
-		m_eDefaultForeground = eForeground;
+		_eDefaultForeground = eForeground;
 	}
 
 public:
-	bool HitKey()
+	virtual bool hitKey() noexcept
 	{
 		if (GetAsyncKeyState(VK_LMENU) < 0 && GetAsyncKeyState(VK_RETURN) < 0)
 		{
-			Reset();
+			reset();
 			return false;
 		}
 
 		if (_kbhit())
 		{
-			m_HitKey = _getch();
+			_hitKey = _getch();
 
-			if (m_HitKey == 224)
+			if (_hitKey == 224)
 			{
-				m_HitKey = 0;
-				int Key{ _getch() }; // arrow keys (up 72, left 75, right 77, down 80)
-				if (Key == 72) m_eHitArrowKey = EArrowKeys::Up;
-				else if (Key == 75) m_eHitArrowKey = EArrowKeys::Left;
-				else if (Key == 77) m_eHitArrowKey = EArrowKeys::Right;
-				else if (Key == 80) m_eHitArrowKey = EArrowKeys::Down;
-				else m_eHitArrowKey = EArrowKeys::None;
+				_hitKey = 0;
+				int key{ _getch() }; // arrow keys (up 72, left 75, right 77, down 80)
+				if (key == 72) _eHitArrowKey = EArrowKeys::Up;
+				else if (key == 75) _eHitArrowKey = EArrowKeys::Left;
+				else if (key == 77) _eHitArrowKey = EArrowKeys::Right;
+				else if (key == 80) _eHitArrowKey = EArrowKeys::Down;
+				else _eHitArrowKey = EArrowKeys::None;
 			}
 			else
 			{
-				m_eHitArrowKey = EArrowKeys::None;
+				_eHitArrowKey = EArrowKeys::None;
 			}
 
 			return true;
 		}
-		m_HitKey = 0;
+		_hitKey = 0;
 		return false;
 	}
 
-	bool IsHitKey(int KeyCode) const
+	virtual bool isKeyHit(int keyCode) const noexcept
 	{
-		return (m_HitKey == KeyCode);
+		return (_hitKey == keyCode);
 	}
 
-	bool IsHitKey(EArrowKeys ArrowKey) const
+	virtual bool isKeyHit(EArrowKeys eArrowKey) const noexcept
 	{
-		return (m_eHitArrowKey == ArrowKey);
+		return (_eHitArrowKey == eArrowKey);
 	}
 
 public:
-	bool IsReadingCommand() const { return m_bReadingCommand; }
-	bool ReadCommand()
+	virtual bool isReadingCommand() const noexcept { return _bReadingCommand; }
+	virtual bool readCommand() noexcept
 	{
 		// Initialize variables
-		m_bReadingCommand = true;
-		m_CommandReadBytes = 0;
-		int CurrentLogIndex{ m_CommandLogIndex };
+		_bReadingCommand = true;
+		_commandReadBytes = 0;
+		int currentLogIndex{ _commandLogIndex };
 		while (true)
 		{
 			if (_kbhit())
 			{
-				bool ShouldRead{ true };
-				int Key{ _getch() };
-				if (Key == 224)
+				bool bShouldRead{ true };
+				int key{ _getch() };
+				if (key == 224)
 				{
-					int Arrow{ _getch() };
-					if (Arrow == 72) // Up
+					int arrowKey{ _getch() };
+					if (arrowKey == 72) // Up
 					{
-						memset(m_CommandBuffer, 0, KCommandBufferSize);
+						memset(_commandBuffer, 0, kCommandBufferSize);
 
-						--CurrentLogIndex;
-						if (CurrentLogIndex < 0) CurrentLogIndex = KCommandLogSize - 1;
+						--currentLogIndex;
+						if (currentLogIndex < 0) currentLogIndex = kCommandLogSize - 1;
 
-						memcpy(m_CommandBuffer, m_CommandLog[CurrentLogIndex], strlen(m_CommandLog[CurrentLogIndex]));
-						m_CommandReadBytes = (short)strlen(m_CommandBuffer);
-						ShouldRead = false;
+						memcpy(_commandBuffer, _commandLog[currentLogIndex], strlen(_commandLog[currentLogIndex]));
+						_commandReadBytes = (short)strlen(_commandBuffer);
+						bShouldRead = false;
 					}
-					else if (Arrow == 80) // Down
+					else if (arrowKey == 80) // Down
 					{
-						memset(m_CommandBuffer, 0, KCommandBufferSize);
+						memset(_commandBuffer, 0, kCommandBufferSize);
 
-						++CurrentLogIndex;
-						if (CurrentLogIndex >= KCommandLogSize) CurrentLogIndex = 0;
+						++currentLogIndex;
+						if (currentLogIndex >= kCommandLogSize) currentLogIndex = 0;
 
-						memcpy(m_CommandBuffer, m_CommandLog[CurrentLogIndex], strlen(m_CommandLog[CurrentLogIndex]));
-						m_CommandReadBytes = (short)strlen(m_CommandBuffer);
-						ShouldRead = false;
+						memcpy(_commandBuffer, _commandLog[currentLogIndex], strlen(_commandLog[currentLogIndex]));
+						_commandReadBytes = (short)strlen(_commandBuffer);
+						bShouldRead = false;
 					}
 					else
 					{
 						continue;
 					}
 				}
-				if (Key == VK_ESCAPE)
+				if (key == VK_ESCAPE)
 				{
-					m_CommandReadBytes = 0;
+					_commandReadBytes = 0;
 					break;
 				}
-				if (Key == VK_RETURN)
+				if (key == VK_RETURN)
 				{
 					break;
 				}
-				if (Key == VK_BACK)
+				if (key == VK_BACK)
 				{
-					if (m_CommandReadBytes)
+					if (_commandReadBytes)
 					{
-						if (m_CommandBuffer[m_CommandReadBytes - 1] < 0)
+						if (_commandBuffer[_commandReadBytes - 1] < 0)
 						{
 							// Non-ASCII
 
-							m_CommandBuffer[m_CommandReadBytes - 2] = 0;
-							m_CommandBuffer[m_CommandReadBytes - 1] = 0;
+							_commandBuffer[_commandReadBytes - 2] = 0;
+							_commandBuffer[_commandReadBytes - 1] = 0;
 
-							m_CommandReadBytes -= 2;
+							_commandReadBytes -= 2;
 						}
 						else
 						{
 							// ASCII
 
-							--m_CommandReadBytes;
-							m_CommandBuffer[m_CommandReadBytes] = 0;
+							--_commandReadBytes;
+							_commandBuffer[_commandReadBytes] = 0;
 						}
 					}
-					ShouldRead = false;
+					bShouldRead = false;
 				}
 
-				if (ShouldRead)
+				if (bShouldRead)
 				{
-					if (m_CommandReadBytes >= KCommandBufferSize - 1 || m_CommandReadBytes >= m_Width - 3) continue;
+					if (_commandReadBytes >= kCommandBufferSize - 1 || _commandReadBytes >= _width - 3) continue;
 
-					m_CommandBuffer[m_CommandReadBytes] = Key;
-					++m_CommandReadBytes;
+					_commandBuffer[_commandReadBytes] = key;
+					++_commandReadBytes;
 				}
 			}
 		}
 
-		m_bReadingCommand = false;
-		if (m_CommandReadBytes)
+		_bReadingCommand = false;
+		if (_commandReadBytes)
 		{
-			memcpy(m_CommandLog[m_CommandLogIndex], m_CommandBuffer, m_CommandReadBytes);
-			++m_CommandLogIndex;
-			if (m_CommandLogIndex >= KCommandLogSize) m_CommandLogIndex = 0;
+			memcpy(_commandLog[_commandLogIndex], _commandBuffer, _commandReadBytes);
+			++_commandLogIndex;
+			if (_commandLogIndex >= kCommandLogSize) _commandLogIndex = 0;
 		}
-		memset(m_CommandBuffer, 0, KCommandBufferSize);
-		return m_CommandReadBytes;
+		memset(_commandBuffer, 0, kCommandBufferSize);
+		return _commandReadBytes;
 	}
 
-	const char* GetLastCommand() const { return m_CommandLog[(m_CommandLogIndex == 0) ? KCommandLogSize : m_CommandLogIndex - 1]; }
+	virtual const char* getLastCommand() const noexcept { return _commandLog[(_commandLogIndex == 0) ? kCommandLogSize : _commandLogIndex - 1]; }
 
-	bool IsLastCommand(const char* Cmp) const
+	virtual bool isLastCommand(const char* cmp) const noexcept
 	{
-		if (!Cmp) return false;
-		int Length{ (int)strlen(Cmp) };
-		if (strncmp(GetLastCommand(), Cmp, Length) == 0)
+		if (!cmp) return false;
+		int length{ (int)strlen(cmp) };
+		if (strncmp(getLastCommand(), cmp, length) == 0)
 		{
 			return true;
 		}
 		return false;
 	}
 
-	// Prints log bottom up
-	// X, Y, Width, Height are outer-box size
-	void PrintCommandLog(short X, short Y, short Width, short Height)
+	// prints log bottom-up
+	// x, y, width, height are outer-box size
+	virtual void printCommandLog(short x, short y, short width, short height) noexcept
 	{
-		X += 1;
-		Y += 1;
-		Width -= 2;
-		Height -= 2;
+		x += 1;
+		y += 1;
+		width -= 2;
+		height -= 2;
 
-		short _Height{ min(min(KCommandLogSize, m_Height), Height) };
-		for (short i = 0; i < _Height; ++i)
+		short height_{ min(min(kCommandLogSize, _height), height) };
+		for (short i = 0; i < height_; ++i)
 		{
-			short CurrentLogIndex{ m_CommandLogIndex - 1 - i };
-			if (CurrentLogIndex < 0) CurrentLogIndex += KCommandLogSize;
-			short _Y{ max(Y + _Height - i - 1, Y) };
+			short currentLogIndex{ _commandLogIndex - 1 - i };
+			if (currentLogIndex < 0) currentLogIndex += kCommandLogSize;
+			short y_{ max(y + height_ - i - 1, y) };
 
-			PrintHString(X, _Y, m_CommandLog[CurrentLogIndex], m_eClearBackground, EForegroundColor::LightYellow,
-				min(Width, (int)(strlen(m_CommandLog[CurrentLogIndex]))));
+			printHorzString(x, y_, _commandLog[currentLogIndex], _eClearBackground, EForegroundColor::LightYellow,
+				min(width, static_cast<short>(strlen(_commandLog[currentLogIndex]))));
 		}
 	}
 
 public:
-	void Terminate() { m_bRunning = false; }
-	bool IsTerminated() const { return !m_bRunning; }
+	virtual void terminate() noexcept { _bRunning = false; }
+	virtual bool isTerminated() const noexcept { return !_bRunning; }
 
-private:
-	void StartUp(const char* Title)
+protected:
+	virtual void startUp(const char* title)
 	{
-		m_Window = GetConsoleWindow();
-		m_Output = GetStdHandle(STD_OUTPUT_HANDLE);
+		_window = GetConsoleWindow();
+		_output = GetStdHandle(STD_OUTPUT_HANDLE);
 
-		CleanUp();
+		cleanUp();
 
-		m_BufferSize = m_Width * (m_Height - 1);
-		m_Buffer = new CHAR_INFO[m_BufferSize]{};
+		_bufferSize = _width * (_height - 1);
+		_buffer = new CHAR_INFO[_bufferSize]{};
 
-		SetConsoleTitleA(Title);
+		SetConsoleTitleA(title);
 
-		Reset();
+		reset();
 
-		m_bRunning = true;
+		_bRunning = true;
 	}
 
-	void Reset()
+	virtual void reset()
 	{
-		CONSOLE_SCREEN_BUFFER_INFOEX BufferInfo{};
-		BufferInfo.cbSize = sizeof(CONSOLE_SCREEN_BUFFER_INFOEX);
-		GetConsoleScreenBufferInfoEx(m_Output, &BufferInfo);
+		CONSOLE_SCREEN_BUFFER_INFOEX bufferInfo{};
+		bufferInfo.cbSize = sizeof(CONSOLE_SCREEN_BUFFER_INFOEX);
+		GetConsoleScreenBufferInfoEx(_output, &bufferInfo);
 
-		WORD Attribute{ (WORD)((WORD)m_eClearBackground | (WORD)m_eDefaultForeground) };
-		int BufferSize{ BufferInfo.dwSize.X * BufferInfo.dwSize.Y };
-		CHAR_INFO* WhiteSpaceBuffer = new CHAR_INFO[BufferSize]{};
-		for (int i = 0; i < BufferSize; ++i)
+		WORD attribute{ (WORD)((WORD)_eClearBackground | (WORD)_eDefaultForeground) };
+		int bufferSize{ bufferInfo.dwSize.X * bufferInfo.dwSize.Y };
+		CHAR_INFO* whiteSpaceBuffer = new CHAR_INFO[bufferSize]{};
+		for (int i = 0; i < bufferSize; ++i)
 		{
-			WhiteSpaceBuffer[i].Char.AsciiChar = ' ';
-			WhiteSpaceBuffer[i].Attributes = Attribute;
+			whiteSpaceBuffer[i].Char.AsciiChar = ' ';
+			whiteSpaceBuffer[i].Attributes = attribute;
 		}
-		WriteConsoleOutputA(m_Output, WhiteSpaceBuffer, BufferInfo.dwSize, COORD{ 0, 0 }, &BufferInfo.srWindow);
-		delete[] WhiteSpaceBuffer;
-		WhiteSpaceBuffer = nullptr;
+		WriteConsoleOutputA(_output, whiteSpaceBuffer, bufferInfo.dwSize, COORD{ 0, 0 }, &bufferInfo.srWindow);
+		delete[] whiteSpaceBuffer;
+		whiteSpaceBuffer = nullptr;
 		
-		BufferInfo.dwMaximumWindowSize.X = BufferInfo.srWindow.Right = BufferInfo.dwSize.X = m_Width;
-		BufferInfo.dwMaximumWindowSize.Y = BufferInfo.srWindow.Bottom = BufferInfo.dwSize.Y = m_Height;
-		SetConsoleScreenBufferInfoEx(m_Output, &BufferInfo);
+		bufferInfo.dwMaximumWindowSize.X = bufferInfo.srWindow.Right = bufferInfo.dwSize.X = _width;
+		bufferInfo.dwMaximumWindowSize.Y = bufferInfo.srWindow.Bottom = bufferInfo.dwSize.Y = _height;
+		SetConsoleScreenBufferInfoEx(_output, &bufferInfo);
 
-		CONSOLE_CURSOR_INFO CursorInfo{ sizeof(CONSOLE_CURSOR_INFO), false };
-		SetConsoleCursorInfo(m_Output, &CursorInfo);
+		CONSOLE_CURSOR_INFO cursorInfo{ sizeof(CONSOLE_CURSOR_INFO), false };
+		SetConsoleCursorInfo(_output, &cursorInfo);
 
-		CONSOLE_HISTORY_INFO HistoryInfo{};
-		HistoryInfo.cbSize = sizeof(CONSOLE_HISTORY_INFO);
-		HistoryInfo.dwFlags = 0;
-		HistoryInfo.HistoryBufferSize = 0;
-		HistoryInfo.NumberOfHistoryBuffers = 0;
-		SetConsoleHistoryInfo(&HistoryInfo);
+		CONSOLE_HISTORY_INFO historyInfo{};
+		historyInfo.cbSize = sizeof(CONSOLE_HISTORY_INFO);
+		historyInfo.dwFlags = 0;
+		historyInfo.HistoryBufferSize = 0;
+		historyInfo.NumberOfHistoryBuffers = 0;
+		SetConsoleHistoryInfo(&historyInfo);
 	}
 
-	void CleanUp()
+	virtual void cleanUp()
 	{
-		if (m_Buffer)
+		if (_buffer)
 		{
-			delete[] m_Buffer;
-			m_Buffer = nullptr;
+			delete[] _buffer;
+			_buffer = nullptr;
 		}
 	}
 
-private:
-	static constexpr short KCommandBufferSize{ 256 };
-	static constexpr short KCommandLogSize{ 30 };
+protected:
+	static constexpr short	kCommandBufferSize{ 256 };
+	static constexpr short	kCommandLogSize{ 30 };
 
-private:
-	bool m_bRunning{};
-	short m_Width{};
-	short m_Height{};
-	HWND m_Window{};
-	HANDLE m_Output{};
+protected:
+	bool					_bRunning{};
+	short					_width{};
+	short					_height{};
+	HWND					_window{};
+	HANDLE					_output{};
 
-private:
-	CHAR_INFO* m_Buffer{};
-	int m_BufferSize{};
+protected:
+	CHAR_INFO*				_buffer{};
+	int						_bufferSize{};
 
-private:
-	EBackgroundColor m_eClearBackground{};
-	EForegroundColor m_eDefaultForeground{ EForegroundColor::White };
+protected:
+	EBackgroundColor		_eClearBackground{};
+	EForegroundColor		_eDefaultForeground{ EForegroundColor::White };
 
-private:
-	mutable int m_HitKey{};
-	mutable EArrowKeys m_eHitArrowKey{};
+protected:
+	mutable int				_hitKey{};
+	mutable EArrowKeys		_eHitArrowKey{};
 
-private:
-	ECommandLinePosition m_eCommandLinePosition{ ECommandLinePosition::Bottom };
-	bool m_bReadingCommand{};
-	char m_CommandBuffer[KCommandBufferSize]{};
-	short m_CommandReadBytes{};
-	char m_CommandLog[KCommandLogSize][KCommandBufferSize]{};
-	short m_CommandLogIndex{};
+protected:
+	ECommandLinePosition	_eCommandLinePosition{ ECommandLinePosition::Bottom };
+	bool					_bReadingCommand{};
+	char					_commandBuffer[kCommandBufferSize]{};
+	short					_commandReadBytes{};
+	char					_commandLog[kCommandLogSize][kCommandBufferSize]{};
+	short					_commandLogIndex{};
 };
