@@ -1,9 +1,16 @@
 ﻿#pragma once
 
+#define USE_THREAD_SAFE_LOG
+
 #include <Windows.h>
 #include <iostream>
 #include <string>
 #include <conio.h>
+
+#ifdef USE_THREAD_SAFE_LOG
+#include <thread>
+#include <mutex>
+#endif // USE_THREAD_SAFE_LOG
 
 namespace fs
 {
@@ -525,6 +532,33 @@ namespace fs
 			}
 		}
 
+#ifdef USE_THREAD_SAFE_LOG
+	public:
+		void clearLog() noexcept
+		{
+			_mtx.lock();
+
+			_log.clear();
+
+			_mtx.unlock();
+		}
+
+		void logLine(const std::string& str) noexcept
+		{
+			_mtx.lock();
+
+			_log += str + "\n";
+
+			_mtx.unlock();
+		}
+
+		void printLog(int16 x, int16 y)
+		{
+			printHorzString(x, y, _log);
+		}
+
+#endif // USE_THREAD_SAFE_LOG
+
 	public:
 		virtual void terminate() noexcept { _bRunning = false; }
 		virtual bool isTerminated() const noexcept { return !_bRunning; }
@@ -590,34 +624,40 @@ namespace fs
 		}
 
 	protected:
-		static constexpr int16	kCommandBufferSize{ 256 };
-		static constexpr int16	kCommandLogSize{ 30 };
+		static constexpr int16		kCommandBufferSize{ 256 };
+		static constexpr int16		kCommandLogSize{ 30 };
 
 	protected:
-		bool					_bRunning{};
-		int16					_width{};
-		int16					_height{};
-		HWND					_window{};
-		HANDLE					_output{};
+		bool						_bRunning{};
+		int16						_width{};
+		int16						_height{};
+		HWND						_window{};
+		HANDLE						_output{};
 
 	protected:
 		CHAR_INFO* _buffer{};
-		uint32					_bufferSize{};
+		uint32						_bufferSize{};
 
 	protected:
-		EBackgroundColor		_eClearBackground{};
-		EForegroundColor		_eDefaultForeground{ EForegroundColor::White };
+		EBackgroundColor			_eClearBackground{};
+		EForegroundColor			_eDefaultForeground{ EForegroundColor::White };
 
 	protected:
-		mutable int32			_hitKey{};
-		mutable EArrowKeys		_eHitArrowKey{};
+		mutable int32				_hitKey{};
+		mutable EArrowKeys			_eHitArrowKey{};
 
 	protected:
-		ECommandLinePosition	_eCommandLinePosition{ ECommandLinePosition::Bottom };
-		bool					_bReadingCommand{};
-		char					_commandBuffer[kCommandBufferSize]{};
-		int16					_commandReadBytes{};
-		char					_commandLog[kCommandLogSize][kCommandBufferSize]{};
-		uint16					_commandLogIndex{};
+		ECommandLinePosition		_eCommandLinePosition{ ECommandLinePosition::Bottom };
+		bool						_bReadingCommand{};
+		char						_commandBuffer[kCommandBufferSize]{};
+		int16						_commandReadBytes{};
+		char						_commandLog[kCommandLogSize][kCommandBufferSize]{};
+		uint16						_commandLogIndex{};
+
+#ifdef USE_THREAD_SAFE_LOG
+	protected:
+		std::mutex					_mtx{};
+		std::string					_log{};
+#endif // USE_THREAD_SAFE_LOG
 	};
 }
